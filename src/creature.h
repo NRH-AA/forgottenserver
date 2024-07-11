@@ -195,6 +195,12 @@ public:
 	virtual void onFollowCreature(const Creature*) {}
 	virtual void onFollowCreatureComplete(const Creature*) {}
 
+	// Pathfinding functions
+	virtual void addFollowedByCreature(Creature* creature) { followedByCreatures.insert(creature); };
+
+	// Pathfinding events
+	void updateFollowingCreaturesPath();
+
 	// combat functions
 	Creature* getAttackedCreature() { return attackedCreature; }
 	virtual bool setAttackedCreature(Creature* creature);
@@ -278,6 +284,7 @@ public:
 	void setCreatureLight(LightInfo lightInfo);
 
 	virtual void onThink(uint32_t interval);
+	virtual void forceUpdatePath();
 	void onAttacking(uint32_t interval);
 	virtual void onWalk();
 	virtual bool getNextStep(Direction& dir, uint32_t& flags);
@@ -384,8 +391,10 @@ protected:
 	Creature* attackedCreature = nullptr;
 	Creature* master = nullptr;
 	Creature* followCreature = nullptr;
+	std::set<Creature*> followedByCreatures;
 
 	uint64_t lastStep = 0;
+	int64_t lastPathUpdate = 0;
 	uint32_t referenceCounter = 0;
 	uint32_t id = 0;
 	uint32_t scriptEventsBitField = 0;
@@ -414,14 +423,12 @@ protected:
 	bool localMapCache[mapWalkHeight][mapWalkWidth] = {{false}};
 	bool isInternalRemoved = false;
 	bool isMapLoaded = false;
-	bool isUpdatingPath = false;
 	bool creatureCheck = false;
 	bool inCheckCreaturesVector = false;
 	bool skillLoss = true;
 	bool lootDrop = true;
 	bool cancelNextWalk = false;
 	bool hasFollowPath = false;
-	bool forceUpdateFollowPath = false;
 	bool hiddenHealth = false;
 	bool canUseDefense = true;
 	bool movementBlocked = false;
